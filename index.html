@@ -43,7 +43,8 @@
             radius: 20,
             velocity: 0,
             gravity: 0.5,
-            jump: -10
+            jump: -10,
+            rotation: 0
         };
 
         let pipes = [];
@@ -94,11 +95,43 @@
         }
 
         function drawBird() {
-            ctx.beginPath();
-            ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
+            ctx.save();
+            ctx.translate(bird.x, bird.y);
+            ctx.rotate(bird.rotation);
+
+            // Body
             ctx.fillStyle = 'yellow';
+            ctx.beginPath();
+            ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
             ctx.fill();
+
+            // Wing
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.ellipse(-5, 0, bird.radius * 0.7, bird.radius * 0.5, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Eye
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(bird.radius * 0.6, -bird.radius * 0.2, bird.radius * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(bird.radius * 0.6, -bird.radius * 0.2, bird.radius * 0.15, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Beak
+            ctx.fillStyle = 'orange';
+            ctx.beginPath();
+            ctx.moveTo(bird.radius * 0.8, bird.radius * 0.3);
+            ctx.lineTo(bird.radius * 1.5, 0);
+            ctx.lineTo(bird.radius * 0.8, -bird.radius * 0.3);
             ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
         }
 
         function drawPipes() {
@@ -134,22 +167,17 @@
         }
 
         function checkCollision() {
-            let birdTop = bird.y - bird.radius;
-            let birdBottom = bird.y + bird.radius;
-            let birdLeft = bird.x - bird.radius;
-            let birdRight = bird.x + bird.radius;
-
             for (let pipe of pipes) {
                 if (
-                    birdRight > pipe.x &&
-                    birdLeft < pipe.x + pipe.width &&
-                    (birdTop < pipe.top || birdBottom > canvas.height - pipe.bottom)
+                    bird.x + bird.radius > pipe.x &&
+                    bird.x - bird.radius < pipe.x + pipe.width &&
+                    (bird.y - bird.radius < pipe.top || bird.y + bird.radius > canvas.height - pipe.bottom)
                 ) {
                     gameOver = true;
                 }
             }
 
-            if (birdTop < 0 || birdBottom > canvas.height) {
+            if (bird.y - bird.radius < 0 || bird.y + bird.radius > canvas.height) {
                 gameOver = true;
             }
         }
@@ -178,6 +206,9 @@
             bird.velocity += bird.gravity;
             bird.y += bird.velocity;
 
+            // Update bird rotation
+            bird.rotation = Math.min(Math.PI / 2, Math.max(-Math.PI / 2, bird.velocity * 0.1));
+
             if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 200) {
                 createPipe();
             }
@@ -195,6 +226,7 @@
         function restartGame() {
             bird.y = 300;
             bird.velocity = 0;
+            bird.rotation = 0;
             pipes = [];
             score = 0;
             gameOver = false;
