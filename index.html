@@ -5,10 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flappy Bird</title>
     <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
         canvas {
             border: 1px solid black;
-            display: block;
-            margin: 0 auto;
         }
         #replayButton {
             display: none;
@@ -41,8 +47,51 @@
         };
 
         let pipes = [];
+        let clouds = [];
         let gameOver = false;
         let score = 0;
+
+        class Cloud {
+            constructor() {
+                this.x = canvas.width;
+                this.y = Math.random() * canvas.height / 2;
+                this.width = Math.random() * 50 + 50;
+                this.height = Math.random() * 30 + 20;
+                this.speed = Math.random() * 0.5 + 0.5;
+            }
+
+            move() {
+                this.x -= this.speed;
+                if (this.x + this.width < 0) {
+                    this.x = canvas.width;
+                    this.y = Math.random() * canvas.height / 2;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.height / 2, Math.PI * 0.5, Math.PI * 1.5);
+                ctx.arc(this.x + this.width, this.y, this.height / 2, Math.PI * 1.5, Math.PI * 0.5);
+                ctx.fill();
+            }
+        }
+
+        function createClouds(count) {
+            for (let i = 0; i < count; i++) {
+                clouds.push(new Cloud());
+            }
+        }
+
+        function drawBackground() {
+            ctx.fillStyle = 'skyblue';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            clouds.forEach(cloud => {
+                cloud.move();
+                cloud.draw();
+            });
+        }
 
         function drawBird() {
             ctx.beginPath();
@@ -113,7 +162,9 @@
 
         function update() {
             if (gameOver) {
-                ctx.fillStyle = 'black';
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'white';
                 ctx.font = '48px Arial';
                 ctx.fillText('Game Over', canvas.width / 2 - 100, canvas.height / 2);
                 replayButton.style.display = 'block';
@@ -122,6 +173,8 @@
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
+            drawBackground();
+
             bird.velocity += bird.gravity;
             bird.y += bird.velocity;
 
@@ -132,8 +185,8 @@
             movePipes();
             checkCollision();
 
-            drawBird();
             drawPipes();
+            drawBird();
             drawScore();
 
             requestAnimationFrame(update);
@@ -157,6 +210,7 @@
 
         replayButton.addEventListener('click', restartGame);
 
+        createClouds(5);
         update();
     </script>
 </body>
