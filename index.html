@@ -13,6 +13,9 @@
             margin: 0;
             background-color: #f0f0f0;
         }
+        #gameContainer {
+            position: relative;
+        }
         canvas {
             border: 1px solid black;
         }
@@ -20,7 +23,7 @@
             display: none;
             position: absolute;
             left: 50%;
-            top: 60%;
+            top: 65%;
             transform: translate(-50%, -50%);
             padding: 10px 20px;
             font-size: 18px;
@@ -29,8 +32,10 @@
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="400" height="600"></canvas>
-    <button id="replayButton">Replay</button>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
+        <button id="replayButton">Replay</button>
+    </div>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -199,9 +204,10 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = 'white';
                 ctx.font = '48px Arial';
-                ctx.fillText('Game Over', canvas.width / 2 - 100, canvas.height / 2);
+                ctx.textAlign = 'center';
+                ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 50);
                 ctx.font = '24px Arial';
-                ctx.fillText('Press any key to restart', canvas.width / 2 - 100, canvas.height / 2 + 50);
+                ctx.fillText('Press any key to restart', canvas.width / 2, canvas.height / 2 + 20);
                 replayButton.style.display = 'block';
                 return;
             }
