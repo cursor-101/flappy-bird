@@ -195,6 +195,8 @@
                 ctx.fillStyle = 'white';
                 ctx.font = '48px Arial';
                 ctx.fillText('Game Over', canvas.width / 2 - 100, canvas.height / 2);
+                ctx.font = '24px Arial';
+                ctx.fillText('Press any key to restart', canvas.width / 2 - 100, canvas.height / 2 + 50);
                 replayButton.style.display = 'block';
                 return;
             }
@@ -234,12 +236,16 @@
             update();
         }
 
-        canvas.addEventListener('click', () => {
-            if (!gameOver) {
+        function handleInput(e) {
+            if (gameOver) {
+                restartGame();
+            } else if (e.type === 'keydown' && e.code === 'Space' || e.type === 'click') {
                 bird.velocity = bird.jump;
             }
-        });
+        }
 
+        canvas.addEventListener('click', handleInput);
+        document.addEventListener('keydown', handleInput);
         replayButton.addEventListener('click', restartGame);
 
         createClouds(5);
