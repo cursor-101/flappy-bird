@@ -10,13 +10,25 @@
             display: block;
             margin: 0 auto;
         }
+        #replayButton {
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 60%;
+            transform: translate(-50%, -50%);
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <button id="replayButton">Replay</button>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const replayButton = document.getElementById('replayButton');
 
         // Game variables
         let bird = {
@@ -104,6 +116,7 @@
                 ctx.fillStyle = 'black';
                 ctx.font = '48px Arial';
                 ctx.fillText('Game Over', canvas.width / 2 - 100, canvas.height / 2);
+                replayButton.style.display = 'block';
                 return;
             }
 
@@ -126,18 +139,23 @@
             requestAnimationFrame(update);
         }
 
+        function restartGame() {
+            bird.y = 300;
+            bird.velocity = 0;
+            pipes = [];
+            score = 0;
+            gameOver = false;
+            replayButton.style.display = 'none';
+            update();
+        }
+
         canvas.addEventListener('click', () => {
-            if (gameOver) {
-                bird.y = 300;
-                bird.velocity = 0;
-                pipes = [];
-                score = 0;
-                gameOver = false;
-                update();
-            } else {
+            if (!gameOver) {
                 bird.velocity = bird.jump;
             }
         });
+
+        replayButton.addEventListener('click', restartGame);
 
         update();
     </script>
