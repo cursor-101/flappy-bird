@@ -53,7 +53,7 @@
         let score = 0;
 
         class Cloud {
-            constructor(initialX = canvas.width) {
+            constructor(initialX = canvas.width + this.height / 2) {
                 this.randomize();
                 this.x = initialX;
             }
@@ -67,8 +67,8 @@
 
             move() {
                 this.x -= this.speed;
-                if (this.x + this.width < 0) {
-                    this.x = canvas.width;
+                if (this.x + this.width + this.height / 2 < 0) {
+                    this.x = canvas.width + this.height / 2;
                     this.randomize();
                 }
             }
