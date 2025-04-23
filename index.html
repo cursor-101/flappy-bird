@@ -53,9 +53,9 @@
         let score = 0;
 
         class Cloud {
-            constructor() {
+            constructor(initialX = canvas.width) {
                 this.randomize();
-                this.x = canvas.width;
+                this.x = initialX;
             }
 
             randomize() {
@@ -84,7 +84,8 @@
 
         function createClouds(count) {
             for (let i = 0; i < count; i++) {
-                clouds.push(new Cloud());
+                const initialX = Math.random() * canvas.width;
+                clouds.push(new Cloud(initialX));
             }
         }
 
@@ -131,7 +132,7 @@
             ctx.beginPath();
             ctx.moveTo(bird.radius * 0.8, bird.radius * 0.3);
             ctx.lineTo(bird.radius * 1.5, 0);
-            ctx.lineTo(bird.radius * 0.8, -bird.radius * 0.3);
+            ctx.lineTo(bird.radius * 0.8, -bird.radius *ValidityState);
             ctx.closePath();
             ctx.fill();
 
