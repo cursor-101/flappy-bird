@@ -57,6 +57,11 @@
         let gameOver = false;
         let score = 0;
 
+        // Fixed time step variables
+        const FIXED_TIME_STEP = 1000 / 60; // 60 FPS
+        let accumulator = 0;
+        let lastTime = 0;
+
         class Cloud {
             constructor(initialX = canvas.width + this.height / 2) {
                 this.randomize();
@@ -70,8 +75,8 @@
                 this.speed = Math.random() * 0.5 + 0.5;
             }
 
-            move() {
-                this.x -= this.speed;
+            move(deltaTime) {
+                this.x -= this.speed * (deltaTime / FIXED_TIME_STEP);
                 if (this.x + this.width + this.height / 2 < 0) {
                     this.x = canvas.width + this.height / 2;
                     this.randomize();
@@ -99,7 +104,6 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             clouds.forEach(cloud => {
-                cloud.move();
                 cloud.draw();
             });
         }
@@ -166,9 +170,9 @@
             });
         }
 
-        function movePipes() {
+        function movePipes(deltaTime) {
             pipes.forEach(pipe => {
-                pipe.x -= 2;
+                pipe.x -= 2 * (deltaTime / FIXED_TIME_STEP);
             });
             if (pipes[0] && pipes[0].x < -50) {
                 pipes.shift();
@@ -199,7 +203,32 @@
             ctx.fillText('Score: ' + score, 10, 30);
         }
 
-        function update() {
+        function updateGameLogic(deltaTime) {
+            bird.velocity += bird.gravity * (deltaTime / FIXED_TIME_STEP);
+            bird.y += bird.velocity * (deltaTime / FIXED_TIME_STEP);
+
+            // Update bird rotation
+            bird.rotation = Math.min(Math.PI / 2, Math.max(-Math.PI / 2, bird.velocity * 0.1));
+
+            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 200) {
+                createPipe();
+            }
+
+            movePipes(deltaTime);
+            clouds.forEach(cloud => cloud.move(deltaTime));
+            checkCollision();
+        }
+
+        function update(currentTime) {
+            if (lastTime === 0) {
+                lastTime = currentTime;
+            }
+
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+
+            accumulator += deltaTime;
+
             if (gameOver) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -213,23 +242,14 @@
                 return;
             }
 
+            while (accumulator >= FIXED_TIME_STEP) {
+                updateGameLogic(FIXED_TIME_STEP);
+                accumulator -= FIXED_TIME_STEP;
+            }
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             drawBackground();
-
-            bird.velocity += bird.gravity;
-            bird.y += bird.velocity;
-
-            // Update bird rotation
-            bird.rotation = Math.min(Math.PI / 2, Math.max(-Math.PI / 2, bird.velocity * 0.1));
-
-            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 200) {
-                createPipe();
-            }
-
-            movePipes();
-            checkCollision();
-
             drawPipes();
             drawBird();
             drawScore();
@@ -245,7 +265,9 @@
             score = 0;
             gameOver = false;
             replayButton.style.display = 'none';
-            update();
+            lastTime = 0;
+            accumulator = 0;
+            requestAnimationFrame(update);
         }
 
         function handleInput(e) {
@@ -261,7 +283,7 @@
         replayButton.addEventListener('click', restartGame);
 
         createClouds(5);
-        update();
+        requestAnimationFrame(update);
     </script>
 </body>
 </html>
