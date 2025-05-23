@@ -182,15 +182,43 @@
 
         function checkCollision() {
             for (let pipe of pipes) {
+                // 1단계: 빠른 AABB(Axis-Aligned Bounding Box) 충돌 검사
                 if (
                     bird.x + bird.radius > pipe.x &&
                     bird.x - bird.radius < pipe.x + pipe.width &&
                     (bird.y - bird.radius < pipe.top || bird.y + bird.radius > canvas.height - pipe.bottom)
                 ) {
-                    gameOver = true;
+                    // AABB 충돌 감지됨 - 더 정확한 거리 기반 충돌 검사 수행
+                    
+                    // X축 방향으로 가장 가까운 점 찾기
+                    let closestX = Math.max(pipe.x, Math.min(bird.x, pipe.x + pipe.width));
+                    
+                    // Y축 방향으로 가장 가까운 점 찾기 (위쪽과 아래쪽 파이프 중 더 가까운 쪽)
+                    let closestY;
+                    
+                    // 새가 위쪽 파이프와 아래쪽 파이프 중 어디에 더 가까운지 판단
+                    if (bird.y < (pipe.top + (canvas.height - pipe.bottom)) / 2) {
+                        // 위쪽 파이프가 더 가까움
+                        closestY = Math.min(bird.y, pipe.top);
+                    } else {
+                        // 아래쪽 파이프가 더 가까움
+                        closestY = Math.max(bird.y, canvas.height - pipe.bottom);
+                    }
+                    
+                    // 거리 계산
+                    let distanceX = bird.x - closestX;
+                    let distanceY = bird.y - closestY;
+                    let distanceSquared = distanceX * distanceX + distanceY * distanceY;
+                    
+                    // 정확한 충돌 판정
+                    if (distanceSquared <= bird.radius * bird.radius) {
+                        gameOver = true;
+                        break;
+                    }
                 }
             }
 
+            // 캔버스 경계와의 충돌 (위, 아래)
             if (bird.y - bird.radius < 0 || bird.y + bird.radius > canvas.height) {
                 gameOver = true;
             }
